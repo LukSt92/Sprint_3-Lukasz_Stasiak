@@ -1,5 +1,4 @@
-import React, { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { styled } from "@mui/material/styles";
 import * as z from "zod";
@@ -9,6 +8,8 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Select from "@mui/material/Select";
+import Checkbox from "@mui/material/Checkbox";
+import { useState } from "react";
 
 const techToLearn = ["React", "HTML", "CSS", "Node.js", "Next.js"];
 const imageTypes = ["image/jpeg", "image/png"];
@@ -38,7 +39,10 @@ const registerSchema = z.object({
     .min(9, { message: "Numer telefonu musi składać się z 9 cyfr." })
     .max(9, { message: "Numer telefonu musi składać się z 9 cyfr." }),
   coursePreferency: z.any(),
-  technology: z.any(),
+  technology: z
+    .string()
+    .array()
+    .min(1, { message: "Prosze wybrać conajmniej jedną technologie" }),
   image: z.any().refine((file) => imageTypes.includes(file[0]?.type), {
     message: "Przesyłane CV musi być w formacie: JPEG lub PNG.",
   }),
@@ -53,10 +57,14 @@ const RegisterForm = () => {
     resolver: zodResolver(registerSchema),
     defaultValues: { coursePreferency: "online" },
   });
+  const [isExp, setIsExp] = useState(false);
+  //   const { fields, append } = useFieldArray({ name: "experience", control });
 
   const onSubmit = (data) => {
     console.log(data);
   };
+  const handleCheckbox = () =>
+    isExp === false ? setIsExp(true) : setIsExp(false);
 
   return (
     <form
@@ -119,12 +127,21 @@ const RegisterForm = () => {
           </option>
         ))}
       </Select>
+      {errors?.technology && <p>{errors.technology.message}</p>}
       <h3 style={{ color: "green" }}>Dodaj swoje CV</h3>
       <Button component="label" variant="outlined">
         Wybierz plik
         <VisuallyHiddenInput {...register("image")} type="file" />
       </Button>
       {errors?.image && <p>{errors.image.message}</p>}
+      <h3 style={{ color: "green" }}>Doświadczenie w programowaniu</h3>
+      <FormControlLabel
+        control={<Checkbox />}
+        label="Czy masz doświadczenie w programowaniu?"
+        value={isExp}
+        onChange={handleCheckbox}
+      />
+      {isExp && <p>Test</p>}
       <Button variant="contained" type="submit">
         Wyślij zgłoszenie
       </Button>
