@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { styled } from "@mui/material/styles";
 import * as z from "zod";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -8,7 +9,21 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
+
+const techToLearn = ["React", "HTML", "CSS", "Node.js", "Next.js"];
+const imageTypes = ["image/jpeg", "image/png"];
+
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
 
 const registerSchema = z.object({
   name: z
@@ -22,43 +37,25 @@ const registerSchema = z.object({
     .string()
     .min(9, { message: "Numer telefonu musi składać się z 9 cyfr." })
     .max(9, { message: "Numer telefonu musi składać się z 9 cyfr." }),
+  coursePreferency: z.any(),
+  technology: z.any(),
+  image: z.any().refine((file) => imageTypes.includes(file[0]?.type), {
+    message: "Przesyłane CV musi być w formacie: JPEG lub PNG.",
+  }),
 });
-
-const techToLearn = ["React", "HTML", "CSS", "Node.js", "Next.js"];
 
 const RegisterForm = () => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm({
     resolver: zodResolver(registerSchema),
-    defaultValues: {},
+    defaultValues: { coursePreferency: "online" },
   });
-
-  const [radioValue, setRadioValue] = useState("online");
-  const [selectValue, setSelectValue] = useState([]);
-
-  const handleSelectChange = (e) => {
-    const { options } = e.target;
-    const value = [];
-    for (let i = 0, l = options.length; i < l; i += 1) {
-      if (options[i].selected) {
-        value.push(options[i].value);
-      }
-    }
-    setSelectValue(value);
-  };
-
-  const handleRadioChange = (e) => {
-    setRadioValue(e.target.value);
-  };
 
   const onSubmit = (data) => {
     console.log(data);
-    console.log(radioValue);
-    console.log(selectValue);
   };
 
   return (
@@ -100,27 +97,34 @@ const RegisterForm = () => {
         helperText={errors.telNumber ? errors.telNumber.message : ""}
       />
       <h3 style={{ color: "green" }}>Preferencje kursu</h3>
-      <RadioGroup
-        row
-        name="controlled-radio-buttons-group"
-        value={radioValue}
-        onChange={handleRadioChange}
-      >
+      <RadioGroup row>
         <p>Wybierz formę nauki:</p>
         <FormControlLabel
+          {...register("coursePreferency")}
           value="stacjonarnie"
           control={<Radio />}
           label="Stacjonarnie"
         />
-        <FormControlLabel value="online" control={<Radio />} label="Online" />
+        <FormControlLabel
+          {...register("coursePreferency")}
+          value="online"
+          control={<Radio />}
+          label="Online"
+        />
       </RadioGroup>
-      <Select multiple native value={selectValue} onChange={handleSelectChange}>
+      <Select {...register("technology")} multiple native>
         {techToLearn.map((technology) => (
           <option key={technology} value={technology}>
             {technology}
           </option>
         ))}
       </Select>
+      <h3 style={{ color: "green" }}>Dodaj swoje CV</h3>
+      <Button component="label" variant="outlined">
+        Wybierz plik
+        <VisuallyHiddenInput {...register("image")} type="file" />
+      </Button>
+      {errors?.image && <p>{errors.image.message}</p>}
       <Button variant="contained" type="submit">
         Wyślij zgłoszenie
       </Button>
