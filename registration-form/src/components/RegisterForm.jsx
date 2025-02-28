@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 
 const registerSchema = z.object({
   name: z
@@ -19,6 +24,8 @@ const registerSchema = z.object({
     .max(9, { message: "Numer telefonu musi składać się z 9 cyfr." }),
 });
 
+const techToLearn = ["React", "HTML", "CSS", "Node.js", "Next.js"];
+
 const RegisterForm = () => {
   const {
     register,
@@ -30,13 +37,33 @@ const RegisterForm = () => {
     defaultValues: {},
   });
 
+  const [radioValue, setRadioValue] = useState("online");
+  const [selectValue, setSelectValue] = useState([]);
+
+  const handleSelectChange = (e) => {
+    const { options } = e.target;
+    const value = [];
+    for (let i = 0, l = options.length; i < l; i += 1) {
+      if (options[i].selected) {
+        value.push(options[i].value);
+      }
+    }
+    setSelectValue(value);
+  };
+
+  const handleRadioChange = (e) => {
+    setRadioValue(e.target.value);
+  };
+
   const onSubmit = (data) => {
     console.log(data);
+    console.log(radioValue);
+    console.log(selectValue);
   };
 
   return (
     <form
-      style={{ backgroundColor: "white" }}
+      style={{ backgroundColor: "brown" }}
       onSubmit={handleSubmit(onSubmit)}
     >
       <h3 style={{ color: "green" }}>Dane osobowe</h3>
@@ -73,7 +100,27 @@ const RegisterForm = () => {
         helperText={errors.telNumber ? errors.telNumber.message : ""}
       />
       <h3 style={{ color: "green" }}>Preferencje kursu</h3>
-
+      <RadioGroup
+        row
+        name="controlled-radio-buttons-group"
+        value={radioValue}
+        onChange={handleRadioChange}
+      >
+        <p>Wybierz formę nauki:</p>
+        <FormControlLabel
+          value="stacjonarnie"
+          control={<Radio />}
+          label="Stacjonarnie"
+        />
+        <FormControlLabel value="online" control={<Radio />} label="Online" />
+      </RadioGroup>
+      <Select multiple native value={selectValue} onChange={handleSelectChange}>
+        {techToLearn.map((technology) => (
+          <option key={technology} value={technology}>
+            {technology}
+          </option>
+        ))}
+      </Select>
       <Button variant="contained" type="submit">
         Wyślij zgłoszenie
       </Button>
