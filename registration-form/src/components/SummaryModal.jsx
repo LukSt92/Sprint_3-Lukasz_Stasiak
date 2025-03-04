@@ -7,12 +7,18 @@ const StyledH3 = styled("h3")({
   fontWeight: "bold",
   fontSize: "24px",
 });
+const StyledStack = styled(Stack)({
+  backgroundColor: "#404040",
+  padding: "16px",
+  borderRadius: "8px",
+  width: "40vh",
+});
 
 export const SummaryModal = ({ data }) => {
   const imageUrl = URL.createObjectURL(data.image[0]);
 
   return (
-    <Stack spacing={2}>
+    <StyledStack spacing={2}>
       <StyledH3>Dane osobowe</StyledH3>
       <p>Imię: {data.name}</p>
       <p>Nazwisko: {data.lastName}</p>
@@ -21,8 +27,8 @@ export const SummaryModal = ({ data }) => {
       {data.experiences.length > 0 && (
         <div>
           <StyledH3>Doświadczenie w programowaniu</StyledH3>
-          {data.experiences.map((exp) => (
-            <p>
+          {data.experiences.map((exp, index) => (
+            <p key={index}>
               Technologia: {exp.name} / poziom: {exp.years}
             </p>
           ))}
@@ -39,6 +45,6 @@ export const SummaryModal = ({ data }) => {
       </ul>
       <StyledH3>Curriculum Vitae</StyledH3>
       <img src={imageUrl}></img>
-    </Stack>
+    </StyledStack>
   );
 };
